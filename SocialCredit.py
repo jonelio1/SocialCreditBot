@@ -16,7 +16,7 @@ NegativeEmote = 'negativesocialcredit'
 CreditStore = {}
 
 try:
-    with open('creditstore.pkl', 'r') as f:
+    with open('creditstore.json', 'r') as f:
         CreditStore = json.load(f)
 except:
     print("No cache found")
@@ -83,7 +83,7 @@ async def on_raw_reaction_add(reaction):
         if reaction.emoji.name == NegativeEmote:
             RemoveCredit(user)
         print(reaction.emoji.name)
-        with open('creditstore.pkl', 'w') as f:
+        with open('creditstore.json', 'w') as f:
             json.dump(CreditStore, f)
 
 
@@ -104,7 +104,7 @@ async def on_raw_reaction_remove(reaction):
     if reaction.emoji.name == NegativeEmote:
         AddCredit(user)
     print(reaction.emoji.name)
-    with open('creditstore.pkl', 'w') as f:
+    with open('creditstore.json', 'w') as f:
         json.dump(CreditStore, f)
 
 bot.run(TOKEN)
