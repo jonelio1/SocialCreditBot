@@ -63,7 +63,7 @@ async def listCredits(ctx):
     return
 
 @bot.command(name='adminclearcredits')
-async def destruct():
+async def destruct(self):
     CreditStore = {}
     with open('/etc/socialcredit/data/creditstore.json', 'w') as f:
         json.dump(CreditStore, f)
