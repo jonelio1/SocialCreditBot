@@ -62,6 +62,11 @@ async def listCredits(ctx):
         await ctx.send(f"{z[0]} has {z[1]} credits ")
     return
 
+@bot.command(name='adminclearcredits')
+async def destruct():
+    CreditStore = {}
+    with open('/etc/socialcredit/data/creditstore.json', 'w') as f:
+        json.dump(CreditStore, f)
 
 @bot.event
 async def on_raw_reaction_add(reaction):
