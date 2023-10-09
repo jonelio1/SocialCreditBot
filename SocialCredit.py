@@ -2,8 +2,14 @@ import os
 import discord
 from discord.ext import commands, tasks
 import json
+## from dotenv import load_dotenv
+
+##load_dotenv()
+##filepath = 'data.json'
+filepath = '/etc/socialcredit/data/creditstore.json'
 
 TOKEN = os.getenv('DISCORD_TOKEN')
+SUPERUSER_ID = int(os.getenv('SUPERUSER_ID'))
 
 intents = discord.Intents().all()
 bot = commands.Bot(command_prefix='!', intents=intents)
@@ -14,59 +20,50 @@ NegativeEmote = 'negativesocialcredit'
 CreditStore = {}
 
 try:
-    with open('/etc/socialcredit/data/creditstore.json', 'r') as f:
+    with open(filepath, 'r') as f:
         CreditStore = json.load(f)
 except:
     print("No cache found")
 
 
-class User:
-    def __init__(self, ID, Name):
-        self.ID = ID
-        self.Name = Name
-
-
-def CheckUserExists(user):
-    if user.ID in CreditStore:
-        UserUpdate(user)
-        return True
-    else:
-        return False
-
-
 def InitUser(user):
-    CreditStore[user.ID] = [user.Name, 0]
-    print(f'Initialised user {user.Name} with ID {user.ID}')
-
-
-def UserUpdate(user):
-    z = CreditStore[user.ID]
-    if z[0] != user.Name:
-        z[0] = user.Name
+    CreditStore[user] = 0
+    print(f'Initialised user with ID {user}')
 
 
 def AddCredit(user):
-    x = CreditStore[user.ID]
-    x[1] += 1
+    CreditStore[user] += 1
 
 
 def RemoveCredit(user):
-    x = CreditStore[user.ID]
-    x[1] -= 1
+    CreditStore[user] -= 1
 
 
 @bot.command(name='credits')
 async def listCredits(ctx):
-    for user in CreditStore:
-        z = CreditStore[user]
-        await ctx.send(f"{z[0]} has {z[1]} credits ")
+    try:
+        message = ""
+        userlist = bot.users
+        for user in userlist:
+            id = str(user.id)
+            if id in CreditStore:
+                message = message + \
+                    f"{user.mention} has {CreditStore[id]} credits \n"
+        await ctx.send(message)
+    except:
+        await ctx.send("There's nothing here :(")
     return
 
-@bot.command(name='adminclearcredits')
+
+@bot.command(name='clearcredits')
 async def destructCredits(ctx):
-    CreditStore = {}
-    with open('/etc/socialcredit/data/creditstore.json', 'w') as f:
-        json.dump(CreditStore, f)
+    if ctx.author.id == SUPERUSER_ID:
+        global CreditStore
+        CreditStore = {}
+        with open(filepath, 'w') as f:
+            json.dump(CreditStore, f)
+        await ctx.send("we wipin")
+
 
 @bot.event
 async def on_raw_reaction_add(reaction):
@@ -74,19 +71,15 @@ async def on_raw_reaction_add(reaction):
     message = await channel.fetch_message(reaction.message_id)
     author = message.author
     if reaction.member.id != author.id:
-        if author.nick == None:
-            username = author.name
-        else:
-            username = author.nick
-        user = User(author.id, username)
-        if CheckUserExists(user) != True:
+        user = author.id
+        if user not in CreditStore:
             InitUser(user)
         if reaction.emoji.name == PositiveEmote:
             AddCredit(user)
         if reaction.emoji.name == NegativeEmote:
             RemoveCredit(user)
         print(reaction.emoji.name)
-        with open('/etc/socialcredit/data/creditstore.json', 'w') as f:
+        with open(filepath, 'w') as f:
             json.dump(CreditStore, f)
 
 
@@ -95,19 +88,15 @@ async def on_raw_reaction_remove(reaction):
     channel = bot.get_channel(reaction.channel_id)
     message = await channel.fetch_message(reaction.message_id)
     author = message.author
-    if author.nick == None:
-        username = author.name
-    else:
-        username = author.nick
-    user = User(author.id, username)
-    if CheckUserExists(user) != True:
+    user = author.id
+    if user not in CreditStore:
         InitUser(user)
     if reaction.emoji.name == PositiveEmote:
         RemoveCredit(user)
     if reaction.emoji.name == NegativeEmote:
         AddCredit(user)
     print(reaction.emoji.name)
-    with open('/etc/socialcredit/data/creditstore.json', 'w') as f:
+    with open(filepath, 'w') as f:
         json.dump(CreditStore, f)
 
 bot.run(TOKEN)

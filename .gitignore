@@ -161,3 +161,4 @@ cython_debug/
 
 creditstore.json
 data/
+data.json
