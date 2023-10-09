@@ -2,7 +2,7 @@ import os
 import discord
 from discord.ext import commands, tasks
 import json
-## from dotenv import load_dotenv
+##from dotenv import load_dotenv
 
 ##load_dotenv()
 ##filepath = 'data.json'
@@ -49,7 +49,10 @@ async def listCredits(ctx):
             if id in CreditStore:
                 message = message + \
                     f"{user.mention} has {CreditStore[id]} credits \n"
-        await ctx.send(message)
+        text = discord.Embed(colour=None, title='Credits', type='rich',
+                             url=None, description=message, timestamp=None)
+        # text.add_field(name='Credits', value=message, inline=False)
+        await ctx.send(embed=text)
     except:
         await ctx.send("There's nothing here :(")
     return
