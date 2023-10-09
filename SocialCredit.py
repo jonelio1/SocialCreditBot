@@ -51,7 +51,6 @@ async def listCredits(ctx):
                     f"{user.mention} has {CreditStore[id]} credits \n"
         text = discord.Embed(colour=None, title='Credits', type='rich',
                              url=None, description=message, timestamp=None)
-        # text.add_field(name='Credits', value=message, inline=False)
         await ctx.send(embed=text)
     except:
         await ctx.send("There's nothing here :(")
@@ -74,7 +73,7 @@ async def on_raw_reaction_add(reaction):
     message = await channel.fetch_message(reaction.message_id)
     author = message.author
     if reaction.member.id != author.id:
-        user = author.id
+        user = str(author.id)
         if user not in CreditStore:
             InitUser(user)
         if reaction.emoji.name == PositiveEmote:
@@ -91,7 +90,7 @@ async def on_raw_reaction_remove(reaction):
     channel = bot.get_channel(reaction.channel_id)
     message = await channel.fetch_message(reaction.message_id)
     author = message.author
-    user = author.id
+    user = str(author.id)
     if user not in CreditStore:
         InitUser(user)
     if reaction.emoji.name == PositiveEmote:
