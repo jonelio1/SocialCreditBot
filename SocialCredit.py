@@ -43,12 +43,16 @@ def RemoveCredit(user):
 async def listCredits(ctx):
     try:
         message = ""
+        sortlist = []
         userlist = bot.users
         for user in userlist:
             id = str(user.id)
             if id in CreditStore:
-                message = message + \
-                    f"{user.mention} has {CreditStore[id]} credits \n"
+                sortlist.append((user.mention,CreditStore[id]))
+                sortlist.sort(key = lambda x:x[1], reverse=True)
+        for user in sortlist:
+            message = message + \
+                f"{user[0]} has {user[1]} credits \n"
         text = discord.Embed(colour=None, title='Credits', type='rich',
                              url=None, description=message, timestamp=None)
         await ctx.send(embed=text)
