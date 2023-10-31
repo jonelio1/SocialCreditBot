@@ -84,15 +84,15 @@ async def setChannel(ctx):
     if ctx.author.id == SUPERUSER_ID:
         botConfig['TargetChannel'] = ctx.channel
         channel = botConfig['TargetChannel']
-        channel.send("Using this channel")
+        await channel.send("Using this channel")
     else:
-        ctx.send("i'm sorry who the fuck are you")
+        await ctx.send("i'm sorry who the fuck are you")
 
 
 @bot.command(name='where')
 async def shoutChannel(ctx):
     channel = botConfig['TargetChannel']
-    channel.send("Here!")
+    await channel.send("Here!")
 
 
 @bot.command(name='credits')
