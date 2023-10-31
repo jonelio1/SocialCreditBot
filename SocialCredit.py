@@ -2,6 +2,7 @@ import os
 import discord
 from discord.ext import commands, tasks
 import json
+import datetime
 # from dotenv import load_dotenv
 
 # load_dotenv()
@@ -39,11 +40,11 @@ def InitUser(user):
     print(f'Initialised user with ID {user}')
 
 
-def AddCredit(user,score):
+def AddCredit(user, score):
     CreditStore[user] += score
 
 
-def RemoveCredit(user,score):
+def RemoveCredit(user, score):
     CreditStore[user] -= score
 
 
@@ -62,6 +63,30 @@ def RemoveCredit(user,score):
 # @bot.command(name='supermult')
 # async def getSuperMult(ctx):
 #     await ctx.send(f"Super Multiplier is currently {botConfig['SuperMult']}")
+
+utc = datetime.timezone.utc
+
+time = datetime.time(hour=20, tzinfo=utc)
+class MyCog(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+        self.my_task.start()
+
+    def cog_unload(self):
+        self.my_task.cancel()
+
+    @tasks.loop(time=time)
+    async def daily_credits(self):
+
+
+
+@bot.command(name='setchannel')
+async def setChanel(ctx):
+    if ctx.author.id == SUPERUSER_ID:
+        botConfig['TargetChannel'] = ctx.channel
+        channel = botConfig['TargetChannel']
+        channel.send("Using this channel")
+
 
 
 @bot.command(name='credits')
@@ -103,19 +128,21 @@ async def on_raw_reaction_add(reaction):
     author = message.author
     if reaction.member.id != author.id:
         user = str(author.id)
-        ##if reaction.burst:
-        ##    score = 1*botConfig['SuperMult']
-        ##else:
+        # if reaction.burst:
+        # score = 1*botConfig['SuperMult']
+        # else:
         score = 1
         if user not in CreditStore:
             InitUser(user)
         if reaction.emoji.name == PositiveEmote:
-            AddCredit(user,score)
+            AddCredit(user, score)
         if reaction.emoji.name == NegativeEmote:
-            RemoveCredit(user,score)
+            RemoveCredit(user, score)
         print(reaction.emoji.name)
         with open(creditStoreFilePath, 'w') as f:
             json.dump(CreditStore, f)
+
+
 
 
 @bot.event
@@ -124,19 +151,21 @@ async def on_raw_reaction_remove(reaction):
     message = await channel.fetch_message(reaction.message_id)
     author = message.author
     user = str(author.id)
-    ##if reaction.burst:
-    ##    score = 1*botConfig['SuperMult']
-    ##else:
+    # if reaction.burst:
+    # score = 1*botConfig['SuperMult']
+    # else:
     score = 1
     if user not in CreditStore:
         InitUser(user)
     if reaction.emoji.name == PositiveEmote:
-        RemoveCredit(user,score)
+        RemoveCredit(user, score)
     if reaction.emoji.name == NegativeEmote:
-        AddCredit(user,score)
+        AddCredit(user, score)
     print(reaction.emoji.name)
     with open(creditStoreFilePath, 'w') as f:
         json.dump(CreditStore, f)
+
+
 @bot.event
 async def on_ready():
     print(discord.__version__)
