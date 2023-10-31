@@ -5,8 +5,9 @@ import json
 ##from dotenv import load_dotenv
 
 ##load_dotenv()
-##filepath = 'data.json'
-filepath = '/etc/socialcredit/data/creditstore.json'
+##creditStoreFilePath = 'data.json'
+creditStoreFilePath = '/etc/socialcredit/data/creditstore.json'
+botConfigFilePath = '/etc/socialcredit/data/config.json'
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 SUPERUSER_ID = int(os.getenv('SUPERUSER_ID'))
@@ -18,12 +19,19 @@ PositiveEmote = 'positivesocialcredit'
 NegativeEmote = 'negativesocialcredit'
 
 CreditStore = {}
+botConfig = {}
 
 try:
-    with open(filepath, 'r') as f:
+    with open(creditStoreFilePath, 'r') as f:
         CreditStore = json.load(f)
 except:
     print("No cache found")
+try:
+    with open(botConfigFilePath,'r') as f:
+        botConfig = json.load(f)
+except:
+    print("No settings found, setting defaults")
+
 
 
 def InitUser(user):
@@ -66,7 +74,7 @@ async def destructCredits(ctx):
     if ctx.author.id == SUPERUSER_ID:
         global CreditStore
         CreditStore = {}
-        with open(filepath, 'w') as f:
+        with open(creditStoreFilePath, 'w') as f:
             json.dump(CreditStore, f)
         await ctx.send("we wipin")
 
@@ -85,7 +93,7 @@ async def on_raw_reaction_add(reaction):
         if reaction.emoji.name == NegativeEmote:
             RemoveCredit(user)
         print(reaction.emoji.name)
-        with open(filepath, 'w') as f:
+        with open(creditStoreFilePath, 'w') as f:
             json.dump(CreditStore, f)
 
 
@@ -102,7 +110,7 @@ async def on_raw_reaction_remove(reaction):
     if reaction.emoji.name == NegativeEmote:
         AddCredit(user)
     print(reaction.emoji.name)
-    with open(filepath, 'w') as f:
+    with open(creditStoreFilePath, 'w') as f:
         json.dump(CreditStore, f)
 
 bot.run(TOKEN)
