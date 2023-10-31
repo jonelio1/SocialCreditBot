@@ -2,10 +2,10 @@ import os
 import discord
 from discord.ext import commands, tasks
 import json
-##from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
-##load_dotenv()
-##creditStoreFilePath = 'data.json'
+# load_dotenv()
+# creditStoreFilePath = 'data.json'
 creditStoreFilePath = '/etc/socialcredit/data/creditstore.json'
 botConfigFilePath = '/etc/socialcredit/data/config.json'
 
@@ -21,17 +21,17 @@ NegativeEmote = 'negativesocialcredit'
 CreditStore = {}
 botConfig = {}
 
+botConfig['SuperMult'] = 1
 try:
     with open(creditStoreFilePath, 'r') as f:
         CreditStore = json.load(f)
 except:
     print("No cache found")
 try:
-    with open(botConfigFilePath,'r') as f:
+    with open(botConfigFilePath, 'r') as f:
         botConfig = json.load(f)
 except:
-    print("No settings found, setting defaults")
-
+    print("No settings found, using defaults")
 
 
 def InitUser(user):
@@ -39,12 +39,29 @@ def InitUser(user):
     print(f'Initialised user with ID {user}')
 
 
-def AddCredit(user):
-    CreditStore[user] += 1
+def AddCredit(user,score):
+    CreditStore[user] += score
 
 
-def RemoveCredit(user):
-    CreditStore[user] -= 1
+def RemoveCredit(user,score):
+    CreditStore[user] -= score
+
+
+@bot.command(name='setsupermult')
+async def setSuperMult(ctx, arg):
+    if ctx.author.id == SUPERUSER_ID:
+        try:
+            botConfig['SuperMult'] == arg
+            print(f"Setting Super multiplier to {arg}")
+            await ctx.send(f"Super Multiplier set to {arg}")
+        except:
+            await ctx.send("Invalid command dumbass")
+    else:
+        await ctx.send("who the fuck are you")
+
+@bot.command(name='supermult')
+async def getSuperMult(ctx):
+    await ctx.send(f"Super Multiplier is currently {botConfig['SuperMult']}")
 
 
 @bot.command(name='credits')
@@ -56,8 +73,8 @@ async def listCredits(ctx):
         for user in userlist:
             id = str(user.id)
             if id in CreditStore:
-                sortlist.append((user.mention,CreditStore[id]))
-                sortlist.sort(key = lambda x:x[1], reverse=True)
+                sortlist.append((user.mention, CreditStore[id]))
+                sortlist.sort(key=lambda x: x[1], reverse=True)
         for user in sortlist:
             message = message + \
                 f"{user[0]} has {user[1]} credits \n"
@@ -86,12 +103,14 @@ async def on_raw_reaction_add(reaction):
     author = message.author
     if reaction.member.id != author.id:
         user = str(author.id)
+        if reaction.burst:
+            score = 1*botConfig['SuperMult']
         if user not in CreditStore:
             InitUser(user)
         if reaction.emoji.name == PositiveEmote:
-            AddCredit(user)
+            AddCredit(user,score)
         if reaction.emoji.name == NegativeEmote:
-            RemoveCredit(user)
+            RemoveCredit(user,score)
         print(reaction.emoji.name)
         with open(creditStoreFilePath, 'w') as f:
             json.dump(CreditStore, f)
@@ -103,12 +122,14 @@ async def on_raw_reaction_remove(reaction):
     message = await channel.fetch_message(reaction.message_id)
     author = message.author
     user = str(author.id)
+    if reaction.burst:
+        score = 1*botConfig['SuperMult']
     if user not in CreditStore:
         InitUser(user)
     if reaction.emoji.name == PositiveEmote:
-        RemoveCredit(user)
+        RemoveCredit(user,score)
     if reaction.emoji.name == NegativeEmote:
-        AddCredit(user)
+        AddCredit(user,score)
     print(reaction.emoji.name)
     with open(creditStoreFilePath, 'w') as f:
         json.dump(CreditStore, f)
