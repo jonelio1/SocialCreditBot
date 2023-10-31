@@ -64,19 +64,19 @@ def RemoveCredit(user, score):
 # async def getSuperMult(ctx):
 #     await ctx.send(f"Super Multiplier is currently {botConfig['SuperMult']}")
 
-utc = datetime.timezone.utc
+# utc = datetime.timezone.utc
 
-time = datetime.time(hour=20, tzinfo=utc)
-class MyCog(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-        self.my_task.start()
+# time = datetime.time(hour=20, tzinfo=utc)
+# class MyCog(commands.Cog):
+#     def __init__(self, bot):
+#         self.bot = bot
+#         self.my_task.start()
 
-    def cog_unload(self):
-        self.my_task.cancel()
+#     def cog_unload(self):
+#         self.my_task.cancel()
 
-    @tasks.loop(time=time)
-    async def daily_credits(self):
+#     @tasks.loop(time=time)
+#     async def daily_credits(self):
 
 
 
