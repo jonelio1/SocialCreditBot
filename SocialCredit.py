@@ -47,21 +47,21 @@ def RemoveCredit(user,score):
     CreditStore[user] -= score
 
 
-@bot.command(name='setsupermult')
-async def setSuperMult(ctx, arg):
-    if ctx.author.id == SUPERUSER_ID:
-        try:
-            botConfig['SuperMult'] == arg
-            print(f"Setting Super multiplier to {arg}")
-            await ctx.send(f"Super Multiplier set to {arg}")
-        except:
-            await ctx.send("Invalid command dumbass")
-    else:
-        await ctx.send("who the fuck are you")
+# @bot.command(name='setsupermult')
+# async def setSuperMult(ctx, arg):
+#     if ctx.author.id == SUPERUSER_ID:
+#         try:
+#             botConfig['SuperMult'] == arg
+#             print(f"Setting Super multiplier to {arg}")
+#             await ctx.send(f"Super Multiplier set to {arg}")
+#         except:
+#             await ctx.send("Invalid command dumbass")
+#     else:
+#         await ctx.send("who the fuck are you")
 
-@bot.command(name='supermult')
-async def getSuperMult(ctx):
-    await ctx.send(f"Super Multiplier is currently {botConfig['SuperMult']}")
+# @bot.command(name='supermult')
+# async def getSuperMult(ctx):
+#     await ctx.send(f"Super Multiplier is currently {botConfig['SuperMult']}")
 
 
 @bot.command(name='credits')
@@ -103,8 +103,10 @@ async def on_raw_reaction_add(reaction):
     author = message.author
     if reaction.member.id != author.id:
         user = str(author.id)
-        if reaction.burst:
-            score = 1*botConfig['SuperMult']
+        ##if reaction.burst:
+        ##    score = 1*botConfig['SuperMult']
+        ##else:
+        score = 1
         if user not in CreditStore:
             InitUser(user)
         if reaction.emoji.name == PositiveEmote:
@@ -122,8 +124,10 @@ async def on_raw_reaction_remove(reaction):
     message = await channel.fetch_message(reaction.message_id)
     author = message.author
     user = str(author.id)
-    if reaction.burst:
-        score = 1*botConfig['SuperMult']
+    ##if reaction.burst:
+    ##    score = 1*botConfig['SuperMult']
+    ##else:
+    score = 1
     if user not in CreditStore:
         InitUser(user)
     if reaction.emoji.name == PositiveEmote:
