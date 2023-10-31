@@ -134,4 +134,5 @@ async def on_raw_reaction_remove(reaction):
     with open(creditStoreFilePath, 'w') as f:
         json.dump(CreditStore, f)
 
+print(discord.version_info)
 bot.run(TOKEN)
