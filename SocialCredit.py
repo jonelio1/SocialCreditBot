@@ -91,7 +91,7 @@ def BuildCreditEmbed():
 #     await ctx.send(f"Super Multiplier is currently {botConfig['SuperMult']}")
 
 
-@tasks.loop(time=botConfig['DailyTime'])
+@tasks.loop(time=(datetime.time(hour=botConfig['DailyTime'], tzinfo=utc)))
 async def dailyCredits(self):
     text = BuildCreditEmbed()
     channel = botConfig['TargetChannel']
