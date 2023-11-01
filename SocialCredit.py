@@ -28,6 +28,10 @@ try:
         CreditStore = json.load(f)
 except:
     print("No cache found")
+
+utc = datetime.timezone.utc
+time = datetime.time(hour=20, tzinfo=utc)
+botConfig['DailyTime'] = time
 try:
     with open(botConfigFilePath, 'r') as f:
         botConfig = json.load(f)
@@ -48,6 +52,23 @@ def RemoveCredit(user, score):
     CreditStore[user] -= score
 
 
+def BuildCreditEmbed():
+    message = ""
+    sortlist = []
+    userlist = bot.users
+    for user in userlist:
+        id = str(user.id)
+        if id in CreditStore:
+            sortlist.append((user.mention, CreditStore[id]))
+            sortlist.sort(key=lambda x: x[1], reverse=True)
+    for user in sortlist:
+        message = message + \
+            f"{user[0]} has {user[1]} credits \n"
+    text = discord.Embed(colour=None, title='Credits', type='rich',
+                         url=None, description=message, timestamp=None)
+    return text
+
+
 # @bot.command(name='setsupermult')
 # async def setSuperMult(ctx, arg):
 #     if ctx.author.id == SUPERUSER_ID:
@@ -55,6 +76,8 @@ def RemoveCredit(user, score):
 #             botConfig['SuperMult'] == arg
 #             print(f"Setting Super multiplier to {arg}")
 #             await ctx.send(f"Super Multiplier set to {arg}")
+#             with open(botConfigFilePath, 'w') as f:
+#               json.dump(botConfig, f)
 #         except:
 #             await ctx.send("Invalid command dumbass")
 #     else:
@@ -64,27 +87,38 @@ def RemoveCredit(user, score):
 # async def getSuperMult(ctx):
 #     await ctx.send(f"Super Multiplier is currently {botConfig['SuperMult']}")
 
-# utc = datetime.timezone.utc
 
-# time = datetime.time(hour=20, tzinfo=utc)
-# class MyCog(commands.Cog):
-#     def __init__(self, bot):
-#         self.bot = bot
-#         self.my_task.start()
-
-#     def cog_unload(self):
-#         self.my_task.cancel()
-
-#     @tasks.loop(time=time)
-#     async def daily_credits(self):
+@tasks.loop(time=botConfig['DailyTime'])
+async def dailyCredits(self):
+    text = BuildCreditEmbed()
+    channel = botConfig['TargetChannel']
+    await channel.send(embed=text)
 
 
 @bot.command(name='setchannel')
 async def setChannel(ctx):
     if ctx.author.id == SUPERUSER_ID:
+        dailyCredits.cancel()
         botConfig['TargetChannel'] = ctx.channel
         channel = botConfig['TargetChannel']
         await channel.send("Using this channel")
+        with open(botConfigFilePath, 'w') as f:
+            json.dump(botConfig, f)
+        dailyCredits.start()
+    else:
+        await ctx.send("i'm sorry who the fuck are you")
+
+
+@bot.command(name='settime')
+async def setTime(ctx, arg):
+    if ctx.author.id == SUPERUSER_ID:
+        dailyCredits.cancel()
+        time = datetime.time(hour=arg, tzinfo=utc)
+        botConfig['DailyTime'] = time
+        await ctx.send(f"Daily Credits run at {arg} UTC")
+        with open(botConfigFilePath, 'w') as f:
+            json.dump(botConfig, f)
+        dailyCredits.start()
     else:
         await ctx.send("i'm sorry who the fuck are you")
 
@@ -98,19 +132,7 @@ async def shoutChannel(ctx):
 @bot.command(name='credits')
 async def listCredits(ctx):
     try:
-        message = ""
-        sortlist = []
-        userlist = bot.users
-        for user in userlist:
-            id = str(user.id)
-            if id in CreditStore:
-                sortlist.append((user.mention, CreditStore[id]))
-                sortlist.sort(key=lambda x: x[1], reverse=True)
-        for user in sortlist:
-            message = message + \
-                f"{user[0]} has {user[1]} credits \n"
-        text = discord.Embed(colour=None, title='Credits', type='rich',
-                             url=None, description=message, timestamp=None)
+        text = BuildCreditEmbed()
         await ctx.send(embed=text)
     except:
         await ctx.send("There's nothing here :(")
