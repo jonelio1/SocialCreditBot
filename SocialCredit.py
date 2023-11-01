@@ -30,14 +30,16 @@ except:
     print("No cache found")
 
 utc = datetime.timezone.utc
-time = datetime.time(hour=20, tzinfo=utc)
-botConfig['DailyTime'] = time
 try:
     with open(botConfigFilePath, 'r') as f:
         botConfig = json.load(f)
 except:
     print("No settings found, using defaults")
 
+try:
+    time = datetime.time(hour=botConfig['DailyTime'], tzinfo=utc)
+except:
+    print("Bad Time yo")
 
 def InitUser(user):
     CreditStore[user] = 0
@@ -113,8 +115,9 @@ async def setChannel(ctx):
 async def setTime(ctx, arg):
     if ctx.author.id == SUPERUSER_ID:
         dailyCredits.cancel()
-        time = datetime.time(hour=arg, tzinfo=utc)
-        botConfig['DailyTime'] = time
+        botConfig['DailyTime'] = arg
+        global time
+        time = datetime.time(hour=botConfig['DailyTime'], tzinfo=utc)
         await ctx.send(f"Daily Credits run at {arg} UTC")
         with open(botConfigFilePath, 'w') as f:
             json.dump(botConfig, f)
