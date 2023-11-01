@@ -116,7 +116,7 @@ async def setChannel(ctx):
 async def setTime(ctx, arg):
     if ctx.author.id == SUPERUSER_ID:
         dailyCredits.cancel()
-        botConfig['DailyTime'] = arg
+        botConfig['DailyTime'] = int(arg)
         global time
         time = datetime.time(hour=botConfig['DailyTime'], tzinfo=utc)
         await ctx.send(f"Daily Credits run at {arg} UTC")
