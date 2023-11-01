@@ -131,6 +131,10 @@ async def shoutChannel(ctx):
     channel = botConfig['TargetChannel']
     await channel.send("Here!")
 
+@bot.command(name = "when")
+async def shoutTime(ctx):
+    await ctx.send(f"Daily Credits are posted at {botConfig['DailyTime']} UTC")
+
 
 @bot.command(name='credits')
 async def listCredits(ctx):
