@@ -202,4 +202,5 @@ async def on_raw_reaction_remove(reaction):
 @bot.event
 async def on_ready():
     print(discord.__version__)
+    dailyCredits.start()
 bot.run(TOKEN)
