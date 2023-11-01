@@ -40,6 +40,7 @@ try:
     time = datetime.time(hour=botConfig['DailyTime'], tzinfo=utc)
 except:
     print("Bad Time yo")
+    botConfig['DailyTime'] = 20
 
 def InitUser(user):
     CreditStore[user] = 0
